@@ -1,0 +1,12 @@
+.DS_Store
+.git-blame-ignore-revs
+*.log
+*.tar.gz
+CONTRIBUTING.md
+eslint.config.*
+examples
+docgen
+docs
+node_modules
+test
+tsconfig.json
