@@ -1,0 +1,12 @@
+.DS_Store
+.vscode
+docgen
+docs
+node_modules
+test
+npm-debug.log
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+bun.lock
