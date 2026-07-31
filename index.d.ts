@@ -20,6 +20,8 @@ declare namespace Eris {
   // TYPES
 
   // Application Commands
+  type VoiceEncryptionMode = "aead_aes256_gcm_rtpsize" | "aead_xchacha20_poly1305_rtpsize";
+  type VoiceEncodingTransport = "zlib-stream" | "zstd-stream";
   type ApplicationCommandOptions = ApplicationCommandOptionsSubCommand | ApplicationCommandOptionsSubCommandGroup | ApplicationCommandOptionsWithValue;
   type ApplicationCommandOptionsBoolean = ApplicationCommandOption<Constants["ApplicationCommandOptionTypes"]["BOOLEAN"]>;
   type ApplicationCommandOptionsChannel = ApplicationCommandOption<Constants["ApplicationCommandOptionTypes"]["CHANNEL"]>;
@@ -528,7 +530,7 @@ declare namespace Eris {
     agent?: HTTPSAgent;
     allowedMentions?: AllowedMentions;
     autoreconnect?: boolean;
-    compress?: boolean;
+    compress?: boolean | VoiceEncodingTransport;
     connectionTimeout?: number;
     defaultImageFormat?: string;
     defaultImageSize?: number;
@@ -1022,6 +1024,7 @@ declare namespace Eris {
     error: [err: Error];
     pong: [latency: number];
     ready: [];
+    resumed: [];
     speakingStart: [userID: string];
     speakingStop: [userID: string];
     start: [];
@@ -1920,6 +1923,7 @@ declare namespace Eris {
 
   // Voice
   interface JoinVoiceChannelOptions {
+    encryptionMode?: VoiceEncryptionMode;
     opusOnly?: boolean;
     selfDeaf?: boolean;
     selfMute?: boolean;
@@ -2273,8 +2277,9 @@ declare namespace Eris {
     editChannelPosition(channelID: string, position: number, options?: EditChannelPositionOptions): Promise<void>;
     editChannelPositions(guildID: string, channelPositions: ChannelPosition[]): Promise<void>;
     editCommand<T extends ApplicationCommandTypes>(commandID: string, command: ApplicationCommandEditOptions<false, T>): Promise<ApplicationCommand<false, T>>;
-    editEmoji(emojiID: string, options: EditApplicationEmojiOptions): Promise<Emoji>;
     editCommandPermissions(guildID: string, commandID: string, permissions: ApplicationCommandPermissions[], reason?: string): Promise<GuildApplicationCommandPermissions>;
+    editEmoji(emojiID: string, options: EditApplicationEmojiOptions): Promise<Emoji>;
+
     editGuild(guildID: string, options: GuildOptions, reason?: string): Promise<Guild>;
     editGuildCommand<T extends ApplicationCommandTypes>(guildID: string, commandID: string, command: ApplicationCommandEditOptions<true, T>): Promise<ApplicationCommand<true, T>>;
     editGuildDiscovery(guildID: string, options?: DiscoveryOptions): Promise<DiscoveryMetadata>;
@@ -2339,8 +2344,9 @@ declare namespace Eris {
     getDiscoveryCategories(): Promise<DiscoveryCategory[]>;
     getDMChannel(userID: string): Promise<DMChannel>;
     getEmoji(emojiID: string): Promise<Emoji>;
-    getEmojis(): Promise<ApplicationEmojis>;
     getEmojiGuild(emojiID: string): Promise<Guild>;
+    getEmojis(): Promise<ApplicationEmojis>;
+
     getGateway(): Promise<{ url: string }>;
     getGuildAuditLog(guildID: string, options?: GetGuildAuditLogOptions): Promise<GuildAuditLog>;
     /** @deprecated */
@@ -3584,6 +3590,7 @@ declare namespace Eris {
     channels: number;
     connecting: boolean;
     connectionTimeout: NodeJS.Timeout | null;
+    crypto: VoiceCrypto | null;
     current?: VoiceStreamCurrent | null;
     ended?: boolean;
     endpoint: URL;
@@ -3591,8 +3598,9 @@ declare namespace Eris {
     frameSize: number;
     heartbeatInterval: NodeJS.Timeout | null;
     id: string;
-    mode?: string;
-    modes?: string;
+
+    mode?: VoiceEncryptionMode | null;
+    modes?: string[];
     /** Optional dependencies OpusScript (opusscript) or OpusEncoder (@discordjs/opus) */
     opus: Record<string, unknown>;
     opusOnly: boolean;
@@ -3606,9 +3614,7 @@ declare namespace Eris {
     reconnecting: boolean;
     resuming: boolean;
     samplingRate: number;
-    secret: Buffer;
-    sendBuffer: Buffer;
-    sendNonce: Buffer;
+    secret: Buffer | null;
     sequence: number;
     shard: Shard | Record<string, never>;
     shared: boolean;
@@ -3621,7 +3627,7 @@ declare namespace Eris {
     udpSocket: DgramSocket | null;
     volume: number;
     ws: BrowserWebSocket | WebSocket | null;
-    constructor(id: string, options?: { shard?: Shard; shared?: boolean; opusOnly?: boolean });
+    constructor(id: string, options?: { shard?: Shard; shared?: boolean; opusOnly?: boolean; encryptionMode?: VoiceEncryptionMode });
     connect(data: VoiceConnectData): NodeJS.Timer | void;
     disconnect(error?: Error, reconnecting?: boolean): void;
     emit<K extends keyof VoiceEvents>(event: K, ...args: VoiceEvents[K]): boolean;
@@ -3656,6 +3662,19 @@ declare namespace Eris {
     switch(guildID: string, channelID: string): void;
     voiceServerUpdate(data: VoiceServerUpdateData): void;
     toJSON(props?: string[]): JSONCache;
+  }
+
+  export class VoiceCrypto {
+    key: Buffer;
+    mode: VoiceEncryptionMode;
+    native: boolean;
+    constructor(mode: VoiceEncryptionMode, secretKey: Buffer | number[]);
+    decrypt(packet: Buffer, headerSize: number): Buffer | null;
+    encrypt(packet: Buffer, headerSize: number, frame: Buffer): number;
+    static OVERHEAD: number;
+    static supportedModes: VoiceEncryptionMode[];
+    static negotiate(available: string[], preferred?: string): VoiceEncryptionMode | null;
+    toString(): string;
   }
 
   export class VoiceDataStream extends EventEmitter {

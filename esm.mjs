@@ -63,5 +63,6 @@ export const {
   VoiceChannel,
   VoiceConnection,
   VoiceConnectionManager,
+  VoiceCrypto,
   VoiceState,
 } = Eris;
