@@ -65,6 +65,7 @@ Eris.VERSION = require("./package.json").version;
 Eris.VoiceChannel = require("./lib/structures/VoiceChannel");
 Eris.VoiceConnection = require("./lib/voice/VoiceConnection");
 Eris.VoiceConnectionManager = require("./lib/voice/VoiceConnectionManager");
+Eris.VoiceCrypto = require("./lib/voice/VoiceCrypto");
 Eris.VoiceState = require("./lib/structures/VoiceState");
 
 module.exports = Eris;
