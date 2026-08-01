@@ -29,6 +29,46 @@ To pin a mode instead of negotiating:
 bot.joinVoiceChannel(channelID, { encryptionMode: "aead_xchacha20_poly1305_rtpsize" });
 ```
 
+Components V2 (lists with an image per entry)
+---------------------------------------------
+
+An embed only has one thumbnail, so a list where every entry carries its own image next to it is not something an embed can do. Discord's Components V2 can: a **container** groups everything into one block with a single accent bar down the left, and each **section** inside it gets its own image or button on the side.
+
+```js
+bot.createMessage(channelID, Eris.createListContainer({
+  header: "-# Página **1** de **13**",
+  title: "Noticias de anime - Crunchyroll News",
+  description: "¡Aquí tienes las últimas noticias! ✨",
+  color: 0xF47FFF,
+  footer: "Actualizado hace un momento",
+  items: [
+    {
+      title: "Astrae Oratio inicia inscripciones para su beta cerrada",
+      url: "https://www.crunchyroll.com/news",
+      description: "Ocurrirá del 19 de agosto hasta el 21 de septiembre",
+      thumbnail: "https://example.com/cover.jpg",
+    },
+    // ...
+  ],
+}));
+```
+
+It returns a ready-made message payload, so it also works with `editMessage`, `createInteractionResponse` and webhooks. An item may use `text` for raw markdown instead of `title`/`description`, and `accessory` to put a button on the side instead of an image.
+
+For layouts the helper does not cover, the primitives are exported too:
+
+```js
+const { componentsV2, container, section, separator, textDisplay, thumbnail, mediaGallery } = Eris;
+
+bot.createMessage(channelID, componentsV2(container([
+  textDisplay("## Resultado de la búsqueda"),
+  separator({ spacing: 2 }),
+  section(["**Mushoku Tensei**", "-# Fantasía · Isekai"], thumbnail("https://example.com/cover.jpg")),
+], { color: 0xF47FFF })));
+```
+
+Discord requires the `IS_COMPONENTS_V2` flag for these messages, which the builders set for you. That flag also means the message **cannot carry `content` or `embeds`** — put the text in a `textDisplay` instead. The builders reject those combinations, along with the 40 component and 4000 character limits, so you get a clear error instead of a `400` from the API. A full example lives in [examples/componentsV2.js](examples/componentsV2.js).
+
 Gateway compression
 -------------------
 

@@ -1,6 +1,7 @@
 "use strict";
 
 const SUITES = [
+  "./components.test",
   "./voiceCrypto.test",
   "./gatewayCompression.test",
   "./voiceConnection.test",
