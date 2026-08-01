@@ -14,6 +14,28 @@ declare namespace Eris {
   export const Constants: Constants;
   export const VERSION: string;
 
+  // Components V2 builders
+  export const Components: {
+    componentsV2: typeof componentsV2;
+    container: typeof container;
+    countComponents: typeof countComponents;
+    createListContainer: typeof createListContainer;
+    mediaGallery: typeof mediaGallery;
+    section: typeof section;
+    separator: typeof separator;
+    textDisplay: typeof textDisplay;
+    thumbnail: typeof thumbnail;
+  };
+  export function componentsV2(components: (ActionRow | ComponentV2)[] | ActionRow | ComponentV2, options?: Omit<AdvancedMessageContent, "content" | "embed" | "embeds" | "components">): ComponentsV2MessageContent;
+  export function container(components: (ActionRow | ComponentV2)[], options?: { accentColor?: number; color?: number; spoiler?: boolean }): Container;
+  export function countComponents(components: Component | Component[]): number;
+  export function createListContainer(options: ListContainerOptions): ComponentsV2MessageContent;
+  export function mediaGallery(items: (MediaGalleryItem | string)[]): MediaGallery;
+  export function section(content: string | (string | TextDisplay)[], accessory?: Button | Thumbnail): Section;
+  export function separator(options?: { divider?: boolean; spacing?: SeparatorSpacingSize }): Separator;
+  export function textDisplay(content: string): TextDisplay;
+  export function thumbnail(media: UnfurledMediaItem | string, options?: { description?: string; spoiler?: boolean }): Thumbnail;
+
   /** @deprecated */
   export const PrivateChannel: typeof DMChannel;
 
@@ -160,7 +182,9 @@ declare namespace Eris {
   type ActionRowComponents = Button | SelectMenu;
   type Button = InteractionButton | URLButton;
   type ButtonStyles = Constants["ButtonStyles"][keyof Constants["ButtonStyles"]];
-  type Component = ActionRow | ActionRowComponents;
+  type Component = ActionRow | ActionRowComponents | ComponentV2;
+  type ComponentV2 = Container | FileComponent | MediaGallery | Section | Separator | TextDisplay | Thumbnail;
+  type SeparatorSpacingSize = Constants["SeparatorSpacingSizes"][keyof Constants["SeparatorSpacingSizes"]];
   type ImageFormat = Constants["ImageFormats"][number];
   type MessageActivityTypes = Constants["MessageActivityTypes"][keyof Constants["MessageActivityTypes"]];
   type MessageContent = string | AdvancedMessageContent;
@@ -1527,6 +1551,73 @@ declare namespace Eris {
     components: TextInput[];
     type: Constants["ComponentTypes"]["ACTION_ROW"];
   }
+  interface UnfurledMediaItem {
+    url: string;
+  }
+  interface TextDisplay {
+    content: string;
+    type: Constants["ComponentTypes"]["TEXT_DISPLAY"];
+  }
+  interface Thumbnail {
+    description?: string;
+    media: UnfurledMediaItem;
+    spoiler?: boolean;
+    type: Constants["ComponentTypes"]["THUMBNAIL"];
+  }
+  interface Section {
+    accessory?: Button | Thumbnail;
+    components: TextDisplay[];
+    type: Constants["ComponentTypes"]["SECTION"];
+  }
+  interface Separator {
+    divider?: boolean;
+    spacing?: SeparatorSpacingSize;
+    type: Constants["ComponentTypes"]["SEPARATOR"];
+  }
+  interface MediaGalleryItem {
+    description?: string;
+    media: UnfurledMediaItem;
+    spoiler?: boolean;
+  }
+  interface MediaGallery {
+    items: MediaGalleryItem[];
+    type: Constants["ComponentTypes"]["MEDIA_GALLERY"];
+  }
+  interface FileComponent {
+    file: UnfurledMediaItem;
+    spoiler?: boolean;
+    type: Constants["ComponentTypes"]["FILE"];
+  }
+  interface Container {
+    accent_color?: number;
+    components: (ActionRow | ComponentV2)[];
+    spoiler?: boolean;
+    type: Constants["ComponentTypes"]["CONTAINER"];
+  }
+  interface ListContainerItem {
+    accessory?: Button | Thumbnail;
+    description?: string;
+    imageDescription?: string;
+    text?: string;
+    thumbnail?: string;
+    title?: string;
+    url?: string;
+  }
+  interface ListContainerOptions {
+    color?: number;
+    components?: (ActionRow | ComponentV2)[];
+    description?: string;
+    dividers?: boolean;
+    footer?: string;
+    header?: string;
+    items: ListContainerItem[];
+    spoiler?: boolean;
+    title?: string;
+  }
+  interface ComponentsV2MessageContent extends Omit<AdvancedMessageContent, "content" | "embed" | "embeds" | "components"> {
+    components: (ActionRow | ComponentV2)[];
+    flags: number;
+  }
   interface ActiveMessages {
     args: string[];
     command: Command;
@@ -1543,7 +1634,7 @@ declare namespace Eris {
   interface AdvancedMessageContentEdit {
     allowedMentions?: AllowedMentions;
     attachments?: PartialAttachment[];
-    components?: ActionRow[];
+    components?: (ActionRow | ComponentV2)[];
     content?: string;
     /** @deprecated */
     embed?: EmbedOptions;
@@ -2016,7 +2107,7 @@ declare namespace Eris {
     attachments?: PartialAttachment[];
     auth?: boolean;
     avatarURL?: string;
-    components?: ActionRow[];
+    components?: (ActionRow | ComponentV2)[];
     content?: string;
     /** @deprecated */
     embed?: EmbedOptions;
@@ -3151,7 +3242,7 @@ declare namespace Eris {
     /** @deprecated */
     cleanContent: string;
     command?: Command;
-    components?: ActionRow[];
+    components?: (ActionRow | ComponentV2)[];
     content: string;
     createdAt: number;
     editedTimestamp?: number;

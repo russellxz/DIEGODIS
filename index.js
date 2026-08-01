@@ -19,6 +19,7 @@ Eris.Command = require("./lib/command/Command");
 Eris.CommandClient = require("./lib/command/CommandClient");
 Eris.CommandInteraction = require("./lib/structures/CommandInteraction");
 Eris.ComponentInteraction = require("./lib/structures/ComponentInteraction");
+Eris.Components = require("./lib/util/Components");
 Eris.Constants = require("./lib/Constants");
 Eris.DiscordHTTPError = require("./lib/errors/DiscordHTTPError");
 Eris.DiscordRESTError = require("./lib/errors/DiscordRESTError");
@@ -61,6 +62,8 @@ Eris.ThreadMember = require("./lib/structures/ThreadMember");
 Eris.UnavailableGuild = require("./lib/structures/UnavailableGuild");
 Eris.UnknownInteraction = require("./lib/structures/UnknownInteraction");
 Eris.User = require("./lib/structures/User");
+Object.assign(Eris, Eris.Components);
+
 Eris.VERSION = require("./package.json").version;
 Eris.VoiceChannel = require("./lib/structures/VoiceChannel");
 Eris.VoiceConnection = require("./lib/voice/VoiceConnection");
